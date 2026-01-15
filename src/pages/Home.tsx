@@ -1,18 +1,19 @@
-import { useState } from 'react';
-import { ImageUploader } from '../components/ImageUploader';
-import { ResultCard } from '../components/ResultCard';
-import { analyzeImage } from '../services/api';
-import type { PredictionClass } from '../types/index';
-import '../styles/Home.css';
+import { useState } from "react";
+import { ImageUploader } from "../components/ImageUploader";
+import { ResultCard } from "../components/ResultCard";
+import { analyzeImage } from "../services/api";
+import type { PredictionClass } from "../types/index";
+import "../styles/Home.css";
 
 export function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result,setResult] = useState<PredictionClass | null>(null);
+  const [result, setResult] = useState<PredictionClass | null>(null);
+  const [uploaderKey, setUploaderKey] = useState(0);
 
   const handlePredict = async () => {
     if (!file) return;
-    
+
     setLoading(true);
     setResult(null);
 
@@ -27,6 +28,12 @@ export function Home() {
     }
   };
 
+  function clean() {
+    setResult(null);
+    setFile(null);
+    setUploaderKey((prev) => prev + 1);
+  }
+
   return (
     <div className="container">
       <header className="home-header">
@@ -35,16 +42,27 @@ export function Home() {
       </header>
 
       <div className="home-card">
-        <ImageUploader onImageSelected={setFile} />
-
+        <ImageUploader key={uploaderKey} onImageSelected={setFile} />
         {file && (
-          <button 
-            className="btn btn-primary predict-button" 
-            onClick={handlePredict}
-            disabled={loading}
-          >
-            {loading ? 'Analisando...' : '🔍 Realizar Previsão'}
-          </button>
+          <div className="predict-buttons">
+            {result && (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  clean();
+                }}
+              >
+                🔃 Analisar Outra Imagem
+              </button>
+            )}
+            <button
+              className="btn btn-primary"
+              onClick={handlePredict}
+              disabled={loading}
+            >
+              {loading ? "Analisando..." : "🔍 Realizar Previsão"}
+            </button>
+          </div>
         )}
 
         {result && <ResultCard result={result} />}
